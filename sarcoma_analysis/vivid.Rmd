@@ -1,0 +1,386 @@
+```{r}
+
+library(vivid)
+library(tidyverse)
+library(randomForest) # for model fit
+
+df <- read.csv("../data/combined_sarcoma_data.csv")
+df$gender <- as.factor(df$gender)
+
+
+subset(df, select = -c(TCGA_barcode)) %>%
+  rename(non_silent_per_mb = Non.silent.per.Mb, silent_per_mb = Silent.per.Mb) ->
+  df
+
+
+df <- df %>% drop_na()
+
+UPS <- df[df$short_histo == "UPS", ]
+DDLPS <- df[df$short_histo == "DDLPS", ]
+ULMS <- df[df$short_histo == "ULMS", ]
+STLMS <- df[df$short_histo == "STLMS", ]
+MFS <- df[df$short_histo == "MFS", ]
+
+STLMS <-subset(STLMS, select = -c(short_histo))
+ULMS <- subset(ULMS, select = -c(short_histo))
+DDLPS <- subset(DDLPS, select = -c(short_histo))
+UPS <- subset(UPS, select = -c(short_histo))
+MFS <- subset(MFS, select = -c(short_histo))
+
+```
+
+
+```{r}
+# Originals
+
+set.seed(0)
+tree <- randomForest(Y ~ ., data = STLMS)
+viviSTLMS  <- vivi(fit = tree,
+                data = STLMS,
+                response = "Y",
+                gridSize = 50,
+                importanceType = "agnostic",
+                nmax = 500,
+                reorder = FALSE,
+                predictFun = NULL,
+                numPerm = 4,
+                showVimpError = FALSE)
+```
+
+
+```{r, fig.height=5, fig.width=5, dpi=600}
+
+imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
+
+newMat <- viviSTLMS[imp_vars, imp_vars]
+
+viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
+
+ggsave("../figures/STLMS.png")
+
+```
+
+
+```{r, fig.height=7, fig.width=7, dpi=600}
+# Originals
+
+set.seed(0)
+tree <- randomForest(Y ~ ., data = ULMS)
+viviULMS  <- vivi(fit = tree,
+                data = ULMS,
+                response = "Y",
+                gridSize = 50,
+                importanceType = "agnostic",
+                nmax = 500,
+                reorder = FALSE,
+                predictFun = NULL,
+                numPerm = 4,
+                showVimpError = FALSE)
+```
+
+
+```{r, fig.height=5, fig.width=5, dpi=600}
+
+imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
+
+newMat <- viviULMS[imp_vars, imp_vars]
+
+viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
+
+ggsave("../figures/ULMS.png")
+
+```
+
+```{r, fig.height=7, fig.width=7, dpi=600}
+# Originals
+
+set.seed(0)
+tree <- randomForest(Y ~ ., data = DDLPS)
+viviDDLPS  <- vivi(fit = tree,
+                data = DDLPS,
+                response = "Y",
+                gridSize = 50,
+                importanceType = "agnostic",
+                nmax = 500,
+                reorder = FALSE,
+                predictFun = NULL,
+                numPerm = 4,
+                showVimpError = FALSE)
+```
+
+
+```{r, fig.height=5, fig.width=5, dpi=600}
+
+imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
+
+newMat <- viviDDLPS[imp_vars, imp_vars]
+
+viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
+
+ggsave("../figures/DDLPS.png")
+
+```
+
+```{r, fig.height=7, fig.width=7, dpi=600}
+# Originals
+
+set.seed(0)
+tree <- randomForest(Y ~ ., data = UPS)
+viviUPS  <- vivi(fit = tree,
+                data = UPS,
+                response = "Y",
+                gridSize = 50,
+                importanceType = "agnostic",
+                nmax = 500,
+                reorder = FALSE,
+                predictFun = NULL,
+                numPerm = 4,
+                showVimpError = FALSE)
+```
+
+
+```{r, fig.height=5, fig.width=5, dpi=600} 
+imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
+
+newMat <- viviUPS[imp_vars, imp_vars]
+
+viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
+
+ggsave("../figures/UPS.png")
+
+```
+
+```{r, fig.height=7, fig.width=7, dpi=600}
+# Originals
+
+set.seed(0)
+tree <- randomForest(Y ~ ., data = MFS)
+viviMFS  <- vivi(fit = tree,
+                data = MFS,
+                response = "Y",
+                gridSize = 50,
+                importanceType = "agnostic",
+                nmax = 500,
+                reorder = FALSE,
+                predictFun = NULL,
+                numPerm = 4,
+                showVimpError = FALSE)
+```
+
+
+```{r, fig.height=5, fig.width=5, dpi=600}
+
+imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
+
+newMat <- viviMFS[imp_vars, imp_vars]
+
+viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
+
+ggsave("../figures/MFS.png")
+
+```
+
+
+
+
+# Predictions
+
+```{r}
+
+mat_UPS <- as.matrix(viviUPS)
+mat_MFS <- as.matrix(viviMFS)
+mat_STLMS <- as.matrix(viviSTLMS)
+mat_DDLPS <- as.matrix(viviDDLPS)
+mat_ULMS <- as.matrix(viviULMS)
+
+```
+
+```{r}
+SS <- c(0.09871752, 0.00647638, 0.38413614, 0.47044287, 0.0402271)
+MPNST <- c(0.28199592, 0.01222614, 0.27322785, 0.18529095, 0.24725914)
+
+viviSS <- SS[1]*mat_DDLPS + SS[2]*mat_MFS + SS[3]*mat_STLMS + SS[4]*mat_ULMS + SS[5]*mat_UPS
+viviMPNST <- MPNST[1]*mat_DDLPS + MPNST[2]*mat_MFS + MPNST[3]*mat_STLMS + MPNST[4]*mat_ULMS + MPNST[5]*mat_UPS
+
+```
+
+```{r, fig.height=5, fig.width=5, dpi=600}
+
+imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
+
+viviHeatmap(viviSS[imp_vars, imp_vars], angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
+
+ggsave("../figures/SS.png")
+
+```
+
+```{r, fig.height=5, fig.width=5, dpi=600}
+
+viviHeatmap(viviMPNST[imp_vars, imp_vars], angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
+
+ggsave("../figures/MPNST.png")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ######################## Old Stuff #########################
+
+
+
+
+
+
+# RELATIVE
+
+
+```{r}
+
+mat_UPS <- as.matrix(viviUPS)
+mat_MFS <- as.matrix(viviMFS)
+mat_STLMS <- as.matrix(viviSTLMS)
+mat_DDLPS <- as.matrix(viviDDLPS)
+mat_ULMS <- as.matrix(viviULMS)
+
+```
+
+
+```{r}
+features <- unique(as.data.frame(mat_UPS)$Variable_1)
+```
+
+
+
+
+
+
+```{r}
+UPS_rel = mat_UPS - (mat_MFS + mat_STLMS + mat_DDLPS + mat_ULMS)/4
+
+df <- as.data.frame(UPS_rel)
+df$Variable_1 <- factor(df$Variable_1, levels=features)
+df$Variable_2 <- factor(df$Variable_2, levels=features)
+
+ggplot(df, aes(Variable_1, Variable_2)) +                           # Create heatmap with ggplot2
+  geom_tile(aes(fill = Value)) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+  scale_y_discrete(limits=rev) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) + 
+  coord_fixed() +
+  ggsave("UPS_rel.png", dpi=600)
+```
+
+
+```{r}
+MFS_rel = mat_MFS - (mat_UPS + mat_STLMS + mat_DDLPS + mat_ULMS)/4
+
+df <- as.data.frame(MFS_rel)
+df$Variable_1 <- factor(df$Variable_1, levels=features)
+df$Variable_2 <- factor(df$Variable_2, levels=features)
+
+ggplot(df, aes(Variable_1, Variable_2)) +                           # Create heatmap with ggplot2
+  geom_tile(aes(fill = Value)) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+  scale_y_discrete(limits=rev) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) + 
+  coord_fixed() +
+  ggsave("MFS_rel.png", dpi=600)
+```
+
+```{r}
+STLMS_rel = mat_STLMS - (mat_MFS + mat_UPS + mat_DDLPS + mat_ULMS)/4
+
+df <- as.data.frame(STLMS_rel)
+df$Variable_1 <- factor(df$Variable_1, levels=features)
+df$Variable_2 <- factor(df$Variable_2, levels=features)
+
+ggplot(df, aes(Variable_1, Variable_2)) +                           # Create heatmap with ggplot2
+  geom_tile(aes(fill = Value)) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+  scale_y_discrete(limits=rev) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0)+ coord_fixed() +
+  ggsave("STLMS_rel.png", dpi=600)
+```
+
+```{r}
+DDLPS_rel = mat_DDLPS - (mat_MFS + mat_UPS + mat_STLMS + mat_ULMS)/4
+
+df <- as.data.frame(DDLPS_rel)
+df$Variable_1 <- factor(df$Variable_1, levels=features)
+df$Variable_2 <- factor(df$Variable_2, levels=features)
+
+ggplot(df, aes(Variable_1, Variable_2)) +                           # Create heatmap with ggplot2
+  geom_tile(aes(fill = Value)) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+  scale_y_discrete(limits=rev) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0)+ coord_fixed() +
+  ggsave("DDLPS_rel.png", dpi=600)
+```
+
+```{r}
+ULMS_rel = mat_ULMS - (mat_MFS + mat_UPS + mat_STLMS + mat_DDLPS)/4
+
+df <- as.data.frame(ULMS_rel)
+df$Variable_1 <- factor(df$Variable_1, levels=features)
+df$Variable_2 <- factor(df$Variable_2, levels=features)
+
+ggplot(df, aes(Variable_1, Variable_2)) +                           # Create heatmap with ggplot2
+  geom_tile(aes(fill = Value)) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+  scale_y_discrete(limits=rev) +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0)+ coord_fixed() +
+  ggsave("ULMS_rel.png", dpi=600)
+```
+
+
+# Predictions
+
+```{r, fig.height=7, fig.width=7, dpi=600}
+SS <- c(0.13972912, 0.11314286, 0.2368226 , 0.35549179, 0.15481363)
+MPNST <- c(0.22565184, 0.07861522, 0.22491876, 0.22361308, 0.24720111)
+
+viviSS <- SS[1]*mat_STLMS + SS[2]*mat_DDLPS + SS[3]*mat_UPS + SS[4]*mat_MFS + SS[5]*mat_ULMS
+viviMPNST <- MPNST[1]*mat_STLMS + MPNST[2]*mat_DDLPS + MPNST[3]*mat_UPS + MPNST[4]*mat_MFS + MPNST[5]*mat_ULMS
+
+viviHeatmap(viviSS, angle=90)
+
+```
+
+
+
+
+
+```{r, fig.height=7, fig.width=7, dpi=600}
+SS <- c(0.13972912, 0.11314286, 0.2368226 , 0.35549179, 0.15481363) # MFS
+MPNST <- c(0.22565184, 0.07861522, 0.22491876, 0.22361308, 0.24720111) # NOT DDLPS
+
+viviSS <- SS[1]*mat_STLMS + SS[2]*mat_DDLPS + SS[3]*mat_UPS + SS[4]*mat_MFS + SS[5]*mat_ULMS
+viviMPNST <- MPNST[1]*mat_STLMS + MPNST[2]*mat_DDLPS + MPNST[3]*mat_UPS + MPNST[4]*mat_MFS + MPNST[5]*mat_ULMS
+
+viviHeatmap(viviMPNST, angle=90)
+
+```
+
+
+
+
+
+
+
+

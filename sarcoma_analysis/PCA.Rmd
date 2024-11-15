@@ -1,0 +1,58 @@
+
+
+```{r}
+library(tidyverse)
+library(ggbiplot)
+```
+
+
+```{r}
+data <- read.csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/clean/data/combined_sarcoma_data.csv")
+```
+
+
+```{r}
+X <- data %>% select(-c("TCGA_barcode", "Y", "gender")) %>% drop_na()
+groups <- X$short_histo
+X <- X %>% select(-c("short_histo"))
+
+
+pc <- prcomp(X, scale = TRUE)
+```
+
+
+
+
+```{r}
+
+g <- ggbiplot(pc,
+              obs.scale = 1,
+              var.scale = 1,
+              groups = groups,
+              ellipse = TRUE,
+              # circle = TRUE,
+              ellipse.prob = 0.68,
+              ellipse.fill = FALSE,
+              var.axes = FALSE)
+# g <- g + scale_color_discrete(name = '')
+# g <- g + theme(legend.direction = 'horizontal',
+#                legend.position = 'top')
+# print(g)
+
+ggsave("../figures/pca.png", dpi="retina", width=6, height=6)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

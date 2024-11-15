@@ -1,0 +1,117 @@
+
+
+
+```{r}
+library(tidyverse)
+library(MASS)
+library(MN)
+library(latex2exp)
+```
+
+```{r}
+df1 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-24_15-04neqk.csv")
+df2 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-24_15-07lownhighk.csv")
+df3 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-24_15-08highnlowk.csv")
+```
+
+
+
+```{r}
+
+df1$method <- as.factor(df1$method)
+df1$random_sigma <- as.factor(df1$random_sigma)
+df1$simulation_setting <- "n = K"
+
+df2$method <- as.factor(df2$method)
+df2$random_sigma <- as.factor(df2$random_sigma)
+df2$simulation_setting <- "n < K"
+
+df3$method <- as.factor(df3$method)
+df3$random_sigma <- as.factor(df3$random_sigma)
+df3$simulation_setting <- "n > K"
+
+
+df <- rbind(df1, df2, df3)
+
+
+
+df$method <- factor(df$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "Weighted Sum-of-Trees"))
+
+
+ggplot(df, aes(x=random_sigma, y=MSE)) +
+  facet_wrap(~ simulation_setting) + 
+  geom_boxplot(aes(fill=method)) +
+  labs(x=TeX("$\\sigma_\\alpha$"), y="Mean Squared Error (MSE)") + 
+  theme(legend.position="bottom", 
+        text=element_text(size=12), #change font size of all text
+        axis.text=element_text(size=12), #change font size of axis text
+        axis.title=element_text(size=12), #change font size of axis titles
+        plot.title=element_text(size=12), #change font size of plot title
+        legend.text=element_text(size=12), #change font size of legend text
+        legend.title=element_text(size=12),#change font size of legend title  
+        strip.text.x = element_text(size = 12))
+
+
+ggsave("../figures/simulation1.eps", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
+
+```
+
+
+
+
+```{r}
+
+df6 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-27_20-45highnlowk.csv")
+df5 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-27_20-49lownhighk.csv")
+df4 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-27_20-44neqk.csv")
+```
+
+
+
+```{r}
+
+df4$method <- as.factor(df4$method)
+df4$random_sigma <- as.factor(df4$random_sigma)
+df4$simulation_setting <- "n = K"
+
+df5$method <- as.factor(df5$method)
+df5$random_sigma <- as.factor(df5$random_sigma)
+df5$simulation_setting <- "n < K"
+
+df6$method <- as.factor(df6$method)
+df6$random_sigma <- as.factor(df6$random_sigma)
+df6$simulation_setting <- "n > K"
+
+
+df <- rbind(df4, df5, df6)
+
+
+
+df$method <- factor(df$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "Weighted Sum-of-Trees"))
+
+
+ggplot(df, aes(x=random_sigma, y=MSE)) +
+  facet_wrap(~ simulation_setting) + 
+  geom_boxplot(aes(fill=method)) +
+  labs(x=TeX("$\\sigma_\\alpha$"), y="Mean Squared Error (MSE)") + 
+  theme(legend.position="bottom", 
+        text=element_text(size=12), #change font size of all text
+        axis.text=element_text(size=12), #change font size of axis text
+        axis.title=element_text(size=12), #change font size of axis titles
+        plot.title=element_text(size=12), #change font size of plot title
+        legend.text=element_text(size=12), #change font size of legend text
+        legend.title=element_text(size=12), #change font size of legend title  
+        strip.text.x = element_text(size = 12)) 
+
+  
+ggsave("simulation2.eps", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
+
+```
+
+
+
+
+
+
+
+
