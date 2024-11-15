@@ -1,38 +1,54 @@
-```{r}
+---
+title: "Make VIVI Plots of TCGA Sarcoma Data"
+author: "Kevin McCoy"
+date: "`r Sys.Date()`"
+output: html_document
+---
 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load necessary packages
 library(vivid)
 library(tidyverse)
-library(randomForest) # for model fit
+library(randomForest)
+```
 
+
+```{r}
+# Read in data
 df <- read.csv("../data/combined_sarcoma_data.csv")
+
+# Make gender a factor
 df$gender <- as.factor(df$gender)
 
-
+# Remove patient IDs, rename columns
 subset(df, select = -c(TCGA_barcode)) %>%
   rename(non_silent_per_mb = Non.silent.per.Mb, silent_per_mb = Silent.per.Mb) ->
   df
 
-
+# Drop rows with na
 df <- df %>% drop_na()
 
+# Create unique df's for each sarcoma subtype
 UPS <- df[df$short_histo == "UPS", ]
 DDLPS <- df[df$short_histo == "DDLPS", ]
 ULMS <- df[df$short_histo == "ULMS", ]
 STLMS <- df[df$short_histo == "STLMS", ]
 MFS <- df[df$short_histo == "MFS", ]
 
+# Remove subtype variable
 STLMS <-subset(STLMS, select = -c(short_histo))
 ULMS <- subset(ULMS, select = -c(short_histo))
 DDLPS <- subset(DDLPS, select = -c(short_histo))
 UPS <- subset(UPS, select = -c(short_histo))
 MFS <- subset(MFS, select = -c(short_histo))
-
 ```
 
 
 ```{r}
-# Originals
-
+# Fit tree, make VIVI plot for STLMS data
 set.seed(0)
 tree <- randomForest(Y ~ ., data = STLMS)
 viviSTLMS  <- vivi(fit = tree,
@@ -49,21 +65,18 @@ viviSTLMS  <- vivi(fit = tree,
 
 
 ```{r, fig.height=5, fig.width=5, dpi=600}
-
+# Extract features of interest
 imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
-
 newMat <- viviSTLMS[imp_vars, imp_vars]
 
+# Plot VIVI heatmap, save as .png
 viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
-
 ggsave("../figures/STLMS.png")
-
 ```
 
 
 ```{r, fig.height=7, fig.width=7, dpi=600}
-# Originals
-
+# Fit tree, make VIVI plot for ULMS data
 set.seed(0)
 tree <- randomForest(Y ~ ., data = ULMS)
 viviULMS  <- vivi(fit = tree,
@@ -80,20 +93,18 @@ viviULMS  <- vivi(fit = tree,
 
 
 ```{r, fig.height=5, fig.width=5, dpi=600}
-
+# Extract features of interest
 imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
-
 newMat <- viviULMS[imp_vars, imp_vars]
 
+# Plot VIVI heatmap, save as .png
 viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
-
 ggsave("../figures/ULMS.png")
-
 ```
 
-```{r, fig.height=7, fig.width=7, dpi=600}
-# Originals
 
+```{r, fig.height=7, fig.width=7, dpi=600}
+# Fit tree, make VIVI plot for DDLPS data
 set.seed(0)
 tree <- randomForest(Y ~ ., data = DDLPS)
 viviDDLPS  <- vivi(fit = tree,
@@ -110,20 +121,18 @@ viviDDLPS  <- vivi(fit = tree,
 
 
 ```{r, fig.height=5, fig.width=5, dpi=600}
-
+# Extract features of interest
 imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
-
 newMat <- viviDDLPS[imp_vars, imp_vars]
 
+# Plot VIVI heatmap, save as .png
 viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
-
 ggsave("../figures/DDLPS.png")
-
 ```
 
-```{r, fig.height=7, fig.width=7, dpi=600}
-# Originals
 
+```{r, fig.height=7, fig.width=7, dpi=600}
+# Fit tree, make VIVI plot for UPS data
 set.seed(0)
 tree <- randomForest(Y ~ ., data = UPS)
 viviUPS  <- vivi(fit = tree,
@@ -140,19 +149,17 @@ viviUPS  <- vivi(fit = tree,
 
 
 ```{r, fig.height=5, fig.width=5, dpi=600} 
+# Extract features of interest
 imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
-
 newMat <- viviUPS[imp_vars, imp_vars]
 
+# Plot VIVI heatmap, save as .png
 viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
-
 ggsave("../figures/UPS.png")
-
 ```
 
 ```{r, fig.height=7, fig.width=7, dpi=600}
-# Originals
-
+# Fit tree, make VIVI plot for MFS data
 set.seed(0)
 tree <- randomForest(Y ~ ., data = MFS)
 viviMFS  <- vivi(fit = tree,
@@ -169,61 +176,49 @@ viviMFS  <- vivi(fit = tree,
 
 
 ```{r, fig.height=5, fig.width=5, dpi=600}
-
+# Extract features of interest
 imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
-
 newMat <- viviMFS[imp_vars, imp_vars]
 
+# Plot VIVI heatmap, save as .png
 viviHeatmap(mat = newMat, angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
-
 ggsave("../figures/MFS.png")
-
 ```
-
-
-
 
 # Predictions
 
 ```{r}
-
+# Convert subtype df's to matrix
 mat_UPS <- as.matrix(viviUPS)
 mat_MFS <- as.matrix(viviMFS)
 mat_STLMS <- as.matrix(viviSTLMS)
 mat_DDLPS <- as.matrix(viviDDLPS)
 mat_ULMS <- as.matrix(viviULMS)
-
 ```
 
+
 ```{r}
+# Manually enter weights learned by our method
 SS <- c(0.09871752, 0.00647638, 0.38413614, 0.47044287, 0.0402271)
 MPNST <- c(0.28199592, 0.01222614, 0.27322785, 0.18529095, 0.24725914)
 
+# Calculate predicted VIVI
 viviSS <- SS[1]*mat_DDLPS + SS[2]*mat_MFS + SS[3]*mat_STLMS + SS[4]*mat_ULMS + SS[5]*mat_UPS
 viviMPNST <- MPNST[1]*mat_DDLPS + MPNST[2]*mat_MFS + MPNST[3]*mat_STLMS + MPNST[4]*mat_ULMS + MPNST[5]*mat_UPS
-
 ```
 
-```{r, fig.height=5, fig.width=5, dpi=600}
 
+```{r, fig.height=5, fig.width=5, dpi=600}
+# Plot predicted VIVI heatmap
 imp_vars <- c(1,26, 27, 28, 29, 30, 31, 32, 33, 34)
-
 viviHeatmap(viviSS[imp_vars, imp_vars], angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
-
 ggsave("../figures/SS.png")
-
 ```
+
 
 ```{r, fig.height=5, fig.width=5, dpi=600}
-
+# Plot predicted VIVI heatmap
 viviHeatmap(viviMPNST[imp_vars, imp_vars], angle=90, intLims=c(0, 0.003), impLims=c(0, 0.05))
-
 ggsave("../figures/MPNST.png")
-
 ```
-
-
-
-
-
 
