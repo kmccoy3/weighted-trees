@@ -9,9 +9,9 @@ library(latex2exp)
 ```
 
 ```{r}
-df1 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-24_15-04neqk.csv")
-df2 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-24_15-07lownhighk.csv")
-df3 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-24_15-08highnlowk.csv")
+df1 <- read_csv("../out/2024-09-24_15-04neqk.csv")
+df2 <- read_csv("..out/2024-09-24_15-07lownhighk.csv")
+df3 <- read_csv("..out/2024-09-24_15-08highnlowk.csv")
 ```
 
 
@@ -61,9 +61,9 @@ ggsave("../figures/simulation1.eps", width=5.5, scale=2, height=2.5, units="in",
 
 ```{r}
 
-df6 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-27_20-45highnlowk.csv")
-df5 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-27_20-49lownhighk.csv")
-df4 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/code/out/2024-09-27_20-44neqk.csv")
+df6 <- read_csv("../out/2024-09-27_20-45highnlowk.csv")
+df5 <- read_csv("../out/2024-09-27_20-49lownhighk.csv")
+df4 <- read_csv("../out/2024-09-27_20-44neqk.csv")
 ```
 
 
@@ -104,7 +104,7 @@ ggplot(df, aes(x=random_sigma, y=MSE)) +
         strip.text.x = element_text(size = 12)) 
 
   
-ggsave("simulation2.eps", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
+ggsave("../figures/simulation2.eps", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
 
 ```
 
