@@ -1,6 +1,10 @@
 # Personal additions
 .DS_Store
-data/*
+data/*.csv
+data/*.xlsx
+data/*.tsv
+data/*.cct
+data/*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
