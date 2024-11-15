@@ -1,23 +1,33 @@
+---
+title: "Make Plots of Simulation Results"
+author: "Kevin McCoy"
+date: "`r Sys.Date()`"
+output: html_document
+---
 
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 
-```{r}
+# Load necessary packages
 library(tidyverse)
-library(MASS)
-library(MN)
 library(latex2exp)
 ```
 
+
+# Simulation 1
+
+
 ```{r}
+# Read in simulation data
 df1 <- read_csv("../out/2024-09-24_15-04neqk.csv")
 df2 <- read_csv("..out/2024-09-24_15-07lownhighk.csv")
 df3 <- read_csv("..out/2024-09-24_15-08highnlowk.csv")
 ```
 
 
-
 ```{r}
-
+# Clean, factorize simulation data
 df1$method <- as.factor(df1$method)
 df1$random_sigma <- as.factor(df1$random_sigma)
 df1$simulation_setting <- "n = K"
@@ -30,46 +40,43 @@ df3$method <- as.factor(df3$method)
 df3$random_sigma <- as.factor(df3$random_sigma)
 df3$simulation_setting <- "n > K"
 
-
+# Combine simulation df's
 df <- rbind(df1, df2, df3)
 
-
-
+# Change order of methods
 df$method <- factor(df$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "Weighted Sum-of-Trees"))
 
-
+# Plot and save figure
 ggplot(df, aes(x=random_sigma, y=MSE)) +
   facet_wrap(~ simulation_setting) + 
   geom_boxplot(aes(fill=method)) +
   labs(x=TeX("$\\sigma_\\alpha$"), y="Mean Squared Error (MSE)") + 
   theme(legend.position="bottom", 
-        text=element_text(size=12), #change font size of all text
-        axis.text=element_text(size=12), #change font size of axis text
-        axis.title=element_text(size=12), #change font size of axis titles
-        plot.title=element_text(size=12), #change font size of plot title
-        legend.text=element_text(size=12), #change font size of legend text
-        legend.title=element_text(size=12),#change font size of legend title  
+        text=element_text(size=12), # change font size of all text
+        axis.text=element_text(size=12), # change font size of axis text
+        axis.title=element_text(size=12), # change font size of axis titles
+        plot.title=element_text(size=12), # change font size of plot title
+        legend.text=element_text(size=12), # change font size of legend text
+        legend.title=element_text(size=12), # change font size of legend title  
         strip.text.x = element_text(size = 12))
 
-
 ggsave("../figures/simulation1.eps", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
-
 ```
 
 
+# Simulation 2
 
 
 ```{r}
-
-df6 <- read_csv("../out/2024-09-27_20-45highnlowk.csv")
-df5 <- read_csv("../out/2024-09-27_20-49lownhighk.csv")
+# Read in simulation data
 df4 <- read_csv("../out/2024-09-27_20-44neqk.csv")
+df5 <- read_csv("../out/2024-09-27_20-49lownhighk.csv")
+df6 <- read_csv("../out/2024-09-27_20-45highnlowk.csv")
 ```
 
 
-
 ```{r}
-
+# Clean, factorize simulation data
 df4$method <- as.factor(df4$method)
 df4$random_sigma <- as.factor(df4$random_sigma)
 df4$simulation_setting <- "n = K"
@@ -82,36 +89,26 @@ df6$method <- as.factor(df6$method)
 df6$random_sigma <- as.factor(df6$random_sigma)
 df6$simulation_setting <- "n > K"
 
-
+# Combine simulation df's
 df <- rbind(df4, df5, df6)
 
-
-
+# Change order of methods
 df$method <- factor(df$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "Weighted Sum-of-Trees"))
 
-
+# Plot and save figure
 ggplot(df, aes(x=random_sigma, y=MSE)) +
   facet_wrap(~ simulation_setting) + 
   geom_boxplot(aes(fill=method)) +
   labs(x=TeX("$\\sigma_\\alpha$"), y="Mean Squared Error (MSE)") + 
   theme(legend.position="bottom", 
-        text=element_text(size=12), #change font size of all text
-        axis.text=element_text(size=12), #change font size of axis text
-        axis.title=element_text(size=12), #change font size of axis titles
-        plot.title=element_text(size=12), #change font size of plot title
-        legend.text=element_text(size=12), #change font size of legend text
-        legend.title=element_text(size=12), #change font size of legend title  
+        text=element_text(size=12), # change font size of all text
+        axis.text=element_text(size=12), # change font size of axis text
+        axis.title=element_text(size=12), # change font size of axis titles
+        plot.title=element_text(size=12), # change font size of plot title
+        legend.text=element_text(size=12), # change font size of legend text
+        legend.title=element_text(size=12), # change font size of legend title  
         strip.text.x = element_text(size = 12)) 
 
-  
 ggsave("../figures/simulation2.eps", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
-
 ```
-
-
-
-
-
-
-
 
