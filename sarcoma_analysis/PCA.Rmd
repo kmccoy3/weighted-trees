@@ -1,58 +1,53 @@
+---
+title: "Make PCA Plots of TCGA Sarcoma Data"
+author: "Kevin McCoy"
+date: "`r Sys.Date()`"
+output: html_document
+---
 
 
-```{r}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load necessary packages
 library(tidyverse)
 library(ggbiplot)
 ```
 
 
 ```{r}
+# Read in combined data, must run `data_cleaning.ipynb` first
 data <- read.csv("../data/combined_sarcoma_data.csv")
 ```
 
 
 ```{r}
+# Remove non-numerical data
 X <- data %>% select(-c("TCGA_barcode", "Y", "gender")) %>% drop_na()
-groups <- X$short_histo
+
+# Extract group information for plotting later
+groups <- X$short_histo 
+
+# Remove extra non-numerical variable
 X <- X %>% select(-c("short_histo"))
 
-
+# Conduct PCA
 pc <- prcomp(X, scale = TRUE)
 ```
 
 
-
-
 ```{r}
-
+# Plot PCA results
 g <- ggbiplot(pc,
               obs.scale = 1,
               var.scale = 1,
               groups = groups,
               ellipse = TRUE,
-              # circle = TRUE,
               ellipse.prob = 0.68,
               ellipse.fill = FALSE,
               var.axes = FALSE)
-# g <- g + scale_color_discrete(name = '')
-# g <- g + theme(legend.direction = 'horizontal',
-#                legend.position = 'top')
-# print(g)
 
+# Save as .png
 ggsave("../figures/pca.png", dpi="retina", width=6, height=6)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
