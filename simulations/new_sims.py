@@ -22,19 +22,41 @@ import statsmodels.formula.api as smf
 
 
 
+def f_0(x):
+    return 10*np.sin(np.pi * x[:,0] * x[:,1])
+
+def f_1(x):
+    return 10*(x[:,2] - 0.5)**2
+
+def f_2(x):
+    return 10*(x[:,2] - 0.5)**2 + 10*x[:,3] + 5*x[:,4]
+
+def f_3(x):
+    return 6*x[:,0] + (4-10*(x[:,1] > 0.5)) * np.sin(np.pi * x[:,0]) - 4*(x[:,1] > 0.5) + 15
 
 
-def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
+def mu_1(x, groups):
+    return (f_0(x) + f_1(x) + f_2(x) - 0.75) * (groups % 2 == 0) + f_3(x) * (groups % 2 == 1)
+
+def mu_2(x, groups):
+    return f_0(x) * (groups % 3 == 0) + f_1(x) * (groups % 3 == 1) + f_2(x) * (groups % 3 == 2) + f_3(x) * (groups % 2 == 0)
+
+def mu_3(x, groups):
+    return f_0(x) * np.logical_or(groups % 3 == 0, groups % 3 == 1) + f_1(x) * np.logical_or(groups % 3 == 1, groups % 3 == 2) + f_2(x) * np.logical_or(groups % 3 == 2, groups % 3 == 0) + f_3(x) * (groups % 2 == 0)
+
+# def mu_2(x, groups):
+
+def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1, mu=1):
 
     # Set random seed
     np.random.seed(seed)
 
     # Generate main covariates
-    M = np.random.uniform(-1, 1, size=(k, p))  # group means
+    M = np.random.uniform(0, 2, size=(k, p))  # group means
     # M = np.zeros((k, p))
-
-    U = invwishart.rvs(df=k+1, scale=np.identity(k))  # row covariance (group covariance)
-    # U = np.identity(k)
+    
+    # U = invwishart.rvs(df=k+1, scale=np.identity(k))  # row covariance (group covariance)
+    U = np.identity(k)
 
     V = np.identity(p)
 
@@ -44,8 +66,7 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
     X = X.reshape((n * k, p))
 
     # Generate group labels
-    # K = np.repeat(np.arange(k), n)
-    K = np.tile(np.arange(k), n)
+    K = np.tile(np.arange(k), n) # groups 0, 1, 2, ..., k-1, 0, 1, ....
 
     # Create dataframe
     df = pd.DataFrame(X, columns=["X" + str(i) for i in range(1, p + 1)])
@@ -53,48 +74,30 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
     # Generate random effects and common noise terms
     noise = np.random.normal(0, noise_sigma, n * k)
 
-    if p != 5:
+    if p < 5:
         raise ValueError("Friedman function requires 5 covariates!")
-
-    out = (
-        np.sin(np.pi * df["X1"] * df["X2"])
-        + 2 * (df["X3"] - 0.5) ** 2
-        + df["X4"]
-        + 0.5 * df["X5"]
-    )
-
-    # out = df["X1"] + df["X2"] + df["X3"] + df["X4"] + df["X5"]
-
-    df["intercept"] = 1
-
+    
     df["group"] = K
 
-    df["random_effect"] = 0.0
 
-    M = np.zeros((k, p+1))
-    V = random_sigma * np.identity(p+1)
+    if mu == 1:
+        out = mu_1(X, K)
+    elif mu == 2:
+        out = mu_2(X, K) 
+    elif mu == 3:
+        out = mu_3(X, K)
 
-    random_effs = matrix_normal.rvs(mean=M, rowcov=U, colcov=V, size=1)
 
-
-    for i in range(k):
-        X = df[df["group"] == i].drop(columns=["group", "random_effect"])
-
-        # print(X.columns)
-        group_alpha = random_effs[i, :]
-        random_effect = np.matmul(X, group_alpha)
-
-        df.loc[df["group"] == i, "random_effect"] = random_effect
 
     df["noise"] = noise
 
-    df["Y"] = out + noise + df["random_effect"]
+    df["Y"] = out + noise # + df["random_effect"]
 
     df["fake"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
-    # df["fake2"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
-    # df["fake3"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
-    # df["fake4"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
-    # df["fake5"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
+    df["fake2"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
+    df["fake3"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
+    df["fake4"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
+    df["fake5"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
 
     # Standardize Y
     df["Y"] = (df["Y"] - df["Y"].mean()) / df["Y"].std()
@@ -111,7 +114,7 @@ def main():
     results_list = []
 
     # Iterate over random sigmas
-    for random_sigma in [0.5, 1, 2, 5]:
+    for n in [20, 50, 100, 500]:
 
         # Iterate over seeds
         for seed in range(num_seeds):
@@ -122,9 +125,11 @@ def main():
                 p=p,
                 n=n,
                 k=k,
-                random_sigma=random_sigma,
-                noise_sigma=noise_sigma
+                noise_sigma=noise_sigma,
+                mu = mu,
             )
+
+            data.to_csv("./syn_data/data_n-" + str(n) + "-Seed-" + str(seed) + "-mu-" + str(mu) + ".csv", index=False)
 
             # Train-test split
             train_ratio = 0.8
@@ -132,8 +137,8 @@ def main():
             X_train = data[data["group"] < last_group]
             X_test = data[data["group"] >= last_group]
 
-            input_vars = ["X1", "X2", "X3", "X4", "X5", "fake"]
-            # input_vars = ["X1", "X2", "X3", "X4", "X5", "fake", "fake2", "fake3", "fake4", "fake5"]
+            # input_vars = ["X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9", "X10"]
+            input_vars = ["X1", "X2", "X3", "X4", "X5", "fake", "fake2", "fake3", "fake4", "fake5"]
 
             ## Regular Tree
             start_time = time()
@@ -145,7 +150,7 @@ def main():
                 {
                     "method": "Decision Tree",
                     "MSE": tree_mse,
-                    "random_sigma": random_sigma,
+                    "n": str(n),
                     "seed": seed,
                     "time": time() - start_time,
                 }
@@ -154,6 +159,7 @@ def main():
             ## Regular random forest
             start_time = time()
             tree = RFR(n_estimators=last_group)
+            # tree = RFR()
             tree.fit(X_train[input_vars], X_train["Y"])
             pred = tree.predict(X_test[input_vars])
             forest_mse = mse(X_test["Y"], pred)
@@ -161,19 +167,24 @@ def main():
                 {
                     "method": "Random Forest",
                     "MSE": forest_mse,
-                    "random_sigma": random_sigma,
+                    "n": str(n),
                     "seed": seed,
                     "time": time() - start_time,
                 }
             )
 
 
+
+
+
+
+
             ## Regular Linear Mixed Model
             start_time = time()
-            df = X_train.drop(columns=["noise", "random_effect", "intercept", "group"])
+            df = X_train.drop(columns=["noise", "group"])
 
-            form = "X1 + X2 + X3 + X4 + X5 + fake"
-            # form = form + " + fake2 + fake3 + fake4 + fake5"
+            form = "X1 + X2 + X3 + X4 + X5 + fake" # X6 + X7 + X8 + X9 + X10"
+            form = form + " + fake2 + fake3 + fake4 + fake5"
             md = smf.mixedlm("Y ~ " + form, df, groups=X_train["group"], re_formula=form)
             mdf = md.fit()
             pred = mdf.predict(X_test)
@@ -182,7 +193,7 @@ def main():
                 {
                     "method": "Linear Mixed Model",
                     "MSE": lmm_mse,
-                    "random_sigma": random_sigma,
+                    "n": str(n),
                     "seed": seed,
                     "time": time() - start_time,
                 }
@@ -238,7 +249,7 @@ def main():
                 {
                     "method": "Weighted Sum-of-Trees",
                     "MSE": my_mse,
-                    "random_sigma": random_sigma,
+                    "n": str(n),
                     "seed": seed,
                     "time": time() - start_time,
                 }
@@ -277,7 +288,7 @@ def main():
                 {
                     "method": "Weighted Sum-of-Forests",
                     "MSE": my_mse,
-                    "random_sigma": random_sigma,
+                    "n": str(n),
                     "seed": seed,
                     "time": time() - start_time,
                 }
@@ -285,18 +296,18 @@ def main():
 
 
 
-        print("Finished Random Sigma: ", random_sigma)
+        print("Finished TEST n=", n)
 
     # Save results in csv and plot
     df = pd.DataFrame(results_list)
     curr_datetime = strftime(f"%Y-%m-%d_%H-%M", localtime())
-    filename = "./out/" + curr_datetime + test_name
+    filename = "./out/" + curr_datetime + test_name 
     df.to_csv(filename + ".csv", index=False)
 
 
     sns.boxplot(
         data=df,
-        x="random_sigma",
+        x="n",
         y="MSE",
         hue="method",
         palette="Paired",
@@ -309,7 +320,7 @@ def main():
         ],
     )
     plt.rcParams['text.usetex'] = True
-    plt.xlabel(r'$\sigma_\alpha$')
+    plt.xlabel(r'$n$')
     plt.savefig(filename + ".png", dpi=600)
 
     # Save parameters
@@ -318,7 +329,7 @@ def main():
         print("p: ", p, file=f)
         print("n: ", n, file=f)
         print("k: ", k, file=f)
-        print("random_sigma: ", random_sigma, file=f)
+        # print("random_sigma: ", random_sigma, file=f)
         print("noise_sigma: ", noise_sigma, file=f)
         print("num_seeds: ", num_seeds, file=f)
         print("test_name: ", test_name, file=f)
@@ -331,12 +342,12 @@ def main():
 
 if __name__ == "__main__":
 
-    test_name = "lownhighk_2"
+    test_name = "mu_1"
 
     # Simulated Data parameters
     p = 5
-    n = 10
-    k = 40
+    mu = 1
+    k = 20
     noise_sigma = 1
     num_seeds = 20
 

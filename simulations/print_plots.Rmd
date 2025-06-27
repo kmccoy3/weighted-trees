@@ -20,9 +20,9 @@ library(latex2exp)
 
 ```{r}
 # Read in simulation data
-df1 <- read_csv("../out/2024-09-24_15-04neqk.csv")
-df2 <- read_csv("..out/2024-09-24_15-07lownhighk.csv")
-df3 <- read_csv("..out/2024-09-24_15-08highnlowk.csv")
+df1 <- read_csv("../out/2025-06-09_12-45neqk.csv")
+df2 <- read_csv("../out/2025-06-09_12-48lownhighk.csv")
+df3 <- read_csv("../out/2025-06-09_12-50highnlowk.csv")
 ```
 
 
@@ -44,13 +44,13 @@ df3$simulation_setting <- "n > K"
 df <- rbind(df1, df2, df3)
 
 # Change order of methods
-df$method <- factor(df$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "Weighted Sum-of-Trees"))
+df$method <- factor(df$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "Weighted Sum-of-Trees", "Weighted Sum-of-Forests"))
 
 # Plot and save figure
 ggplot(df, aes(x=random_sigma, y=MSE)) +
   facet_wrap(~ simulation_setting) + 
   geom_boxplot(aes(fill=method)) +
-  labs(x=TeX("$\\sigma_\\alpha$"), y="Mean Squared Error (MSE)") + 
+  labs(x=TeX("$\\sigma_\\alpha^2$"), y="Mean Squared Error (MSE)") + 
   theme(legend.position="bottom", 
         text=element_text(size=12), # change font size of all text
         axis.text=element_text(size=12), # change font size of axis text
@@ -69,9 +69,9 @@ ggsave("../figures/simulation1.eps", width=5.5, scale=2, height=2.5, units="in",
 
 ```{r}
 # Read in simulation data
-df4 <- read_csv("../out/2024-09-27_20-44neqk.csv")
-df5 <- read_csv("../out/2024-09-27_20-49lownhighk.csv")
-df6 <- read_csv("../out/2024-09-27_20-45highnlowk.csv")
+df4 <- read_csv("../out/2025-06-09_12-57neqk_2.csv")
+df5 <- read_csv("../out/2025-06-09_13-00lownhighk_2.csv")
+df6 <- read_csv("../out/2025-06-09_12-55highnlowk_2.csv")
 ```
 
 
@@ -93,13 +93,13 @@ df6$simulation_setting <- "n > K"
 df <- rbind(df4, df5, df6)
 
 # Change order of methods
-df$method <- factor(df$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "Weighted Sum-of-Trees"))
+df$method <- factor(df$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "Weighted Sum-of-Trees", "Weighted Sum-of-Forests"))
 
 # Plot and save figure
 ggplot(df, aes(x=random_sigma, y=MSE)) +
   facet_wrap(~ simulation_setting) + 
   geom_boxplot(aes(fill=method)) +
-  labs(x=TeX("$\\sigma_\\alpha$"), y="Mean Squared Error (MSE)") + 
+  labs(x=TeX("$\\sigma_\\alpha^2$"), y="Mean Squared Error (MSE)") + 
   theme(legend.position="bottom", 
         text=element_text(size=12), # change font size of all text
         axis.text=element_text(size=12), # change font size of axis text
@@ -110,5 +110,106 @@ ggplot(df, aes(x=random_sigma, y=MSE)) +
         strip.text.x = element_text(size = 12)) 
 
 ggsave("../figures/simulation2.eps", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
+```
+
+
+
+
+####################################################################################################
+
+
+
+```{r}
+time_summary <- data %>%
+    group_by(method, n) %>%
+    summarize(mean_time = round(mean(time), 3)) %>%
+    pivot_wider(names_from = n, values_from = mean_time)
+
+print(time_summary)
+
+
+
+```
+
+
+
+```{r}
+df7 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/weighted-trees/out/2025-06-18_14-47mu_1.csv")
+df7$simulation_setting <- "DGP 1"
+
+df8 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/weighted-trees/out/2025-06-18_14-34mu_2.csv")
+df8$simulation_setting <- "DGP 2"
+
+df9 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/weighted-trees/out/2025-06-18_14-41mu_3.csv")
+df9$simulation_setting <- "DGP 3"
+
+data <- rbind(df7, df8, df9)
+
+
+new_df7$simulation_setting <- "DGP 1"
+new_df8$simulation_setting <- "DGP 2"
+new_df9$simulation_setting <- "DGP 3"
+data <- rbind(new_df7, new_df8, new_df9)
+
+
+
+
+
+# Change order of methods
+data$method <- factor(data$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "BART", "Weighted Sum-of-Trees", "Weighted Sum-of-Forests"))
+
+
+
+data$n <- as.factor(data$n)
+
+# Plot and save figure
+ggplot(data, aes(x=n, y=MSE)) +
+  facet_wrap(~ simulation_setting) + 
+  geom_boxplot(aes(fill=method)) +
+  labs(x=TeX("$n$"), y="Mean Squared Error (MSE)") + 
+  theme(legend.position="bottom",
+        text=element_text(size=12), # change font size of all text
+        axis.text=element_text(size=12), # change font size of axis text
+        axis.title=element_text(size=12), # change font size of axis titles
+        plot.title=element_text(size=12), # change font size of plot title
+        legend.text=element_text(size=12), # change font size of legend text
+        legend.title=element_text(size=12), # change font size of legend title
+        strip.text.x = element_text(size = 12))
+
+
+ggsave("../figures/BART_comparison.png", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+# data <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/weighted-trees/out/2025-06-09_12-08wider_mean_squared_klarge.csv")
+
+data <- data %>%
+    mutate(method = as.factor(method),
+         # random_sigma = as.factor(random_sigma),
+         simulation_setting = "n = K") %>%
+    select(method, random_sigma, MSE, simulation_setting) %>%
+    group_by(method, random_sigma, simulation_setting) %>%
+    summarize(MSE = mean(MSE))
+
+
+ggplot(data, aes(x=random_sigma, y=MSE, color=method)) +
+    geom_line() +
+    geom_point()
+
+
 ```
 
