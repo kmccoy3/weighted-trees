@@ -16,12 +16,12 @@ from sklearn.tree import DecisionTreeRegressor as DTR
 from sklearn.linear_model import LogisticRegression as LR
 from sklearn.naive_bayes import GaussianNB as GNB
 
-
+# statsmodels imports
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
 
-
+# Define basis functions
 def f_0(x):
     return 10*np.sin(np.pi * x[:,0] * x[:,1])
 
@@ -34,7 +34,7 @@ def f_2(x):
 def f_3(x):
     return 6*x[:,0] + (4-10*(x[:,1] > 0.5)) * np.sin(np.pi * x[:,0]) - 4*(x[:,1] > 0.5) + 15
 
-
+# Define 3 Unique Data Generating Processes (DGPs)
 def mu_1(x, groups):
     return (f_0(x) + f_1(x) + f_2(x) - 0.75) * (groups % 2 == 0) + f_3(x) * (groups % 2 == 1)
 
@@ -44,7 +44,7 @@ def mu_2(x, groups):
 def mu_3(x, groups):
     return f_0(x) * np.logical_or(groups % 3 == 0, groups % 3 == 1) + f_1(x) * np.logical_or(groups % 3 == 1, groups % 3 == 2) + f_2(x) * np.logical_or(groups % 3 == 2, groups % 3 == 0) + f_3(x) * (groups % 2 == 0)
 
-# def mu_2(x, groups):
+
 
 def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1, mu=1):
 
@@ -53,11 +53,7 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1, mu=1):
 
     # Generate main covariates
     M = np.random.uniform(0, 2, size=(k, p))  # group means
-    # M = np.zeros((k, p))
-    
-    # U = invwishart.rvs(df=k+1, scale=np.identity(k))  # row covariance (group covariance)
     U = np.identity(k)
-
     V = np.identity(p)
 
     X = matrix_normal.rvs(mean=M, rowcov=U, colcov=V, size=n)
@@ -74,8 +70,7 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1, mu=1):
     # Generate random effects and common noise terms
     noise = np.random.normal(0, noise_sigma, n * k)
 
-    if p < 5:
-        raise ValueError("Friedman function requires 5 covariates!")
+
     
     df["group"] = K
 
@@ -91,7 +86,7 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1, mu=1):
 
     df["noise"] = noise
 
-    df["Y"] = out + noise # + df["random_effect"]
+    df["Y"] = out + noise
 
     df["fake"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
     df["fake2"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
@@ -137,7 +132,6 @@ def main():
             X_train = data[data["group"] < last_group]
             X_test = data[data["group"] >= last_group]
 
-            # input_vars = ["X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9", "X10"]
             input_vars = ["X1", "X2", "X3", "X4", "X5", "fake", "fake2", "fake3", "fake4", "fake5"]
 
             ## Regular Tree
@@ -204,15 +198,13 @@ def main():
 
             # Build group classifier
             start_time = time()
-            group_clf = LR() # GNB() # LR()  # GNB()  # DTC or RFC or LR or something else?
+            group_clf = LR() # GNB()
             group_clf.fit(
                 X_train[input_vars], X_train["group"]
             )
             group_pred = group_clf.predict_proba(
                 X_test[input_vars]
             )
-
-            group_pred = group_pred # + 0.5 #
 
             # Normalize group predictions
             row_sums = group_pred.sum(axis=1)
@@ -327,9 +319,8 @@ def main():
     with open(filename + ".txt", "a") as f:
         print("datetime:", curr_datetime, file=f)
         print("p: ", p, file=f)
-        print("n: ", n, file=f)
         print("k: ", k, file=f)
-        # print("random_sigma: ", random_sigma, file=f)
+        print("mu: ", mu, file=f)
         print("noise_sigma: ", noise_sigma, file=f)
         print("num_seeds: ", num_seeds, file=f)
         print("test_name: ", test_name, file=f)

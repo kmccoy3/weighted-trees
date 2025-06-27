@@ -15,7 +15,7 @@ library(latex2exp)
 ```
 
 
-# Simulation 1
+# Simulation Setting 1
 
 
 ```{r}
@@ -60,11 +60,11 @@ ggplot(df, aes(x=random_sigma, y=MSE)) +
         legend.title=element_text(size=12), # change font size of legend title  
         strip.text.x = element_text(size = 12))
 
-ggsave("../figures/simulation1.eps", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
+ggsave("../figures/simulation1.png", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
 ```
 
 
-# Simulation 2
+# Simulation Setting 2
 
 
 ```{r}
@@ -109,55 +109,37 @@ ggplot(df, aes(x=random_sigma, y=MSE)) +
         legend.title=element_text(size=12), # change font size of legend title  
         strip.text.x = element_text(size = 12)) 
 
-ggsave("../figures/simulation2.eps", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
+ggsave("../figures/simulation2.png", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
 ```
 
 
-
-
-####################################################################################################
-
-
+# Simulation Setting 3
 
 ```{r}
-time_summary <- data %>%
-    group_by(method, n) %>%
-    summarize(mean_time = round(mean(time), 3)) %>%
-    pivot_wider(names_from = n, values_from = mean_time)
 
-print(time_summary)
-
-
+df7 <- read_csv("../out/2025-06-18_14-47mu_1.csv")
+df8 <- read_csv("../out/2025-06-18_14-34mu_2.csv")
+df9 <- read_csv("..out/2025-06-18_14-41mu_3.csv")
 
 ```
 
-
-
 ```{r}
-df7 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/weighted-trees/out/2025-06-18_14-47mu_1.csv")
+
 df7$simulation_setting <- "DGP 1"
-
-df8 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/weighted-trees/out/2025-06-18_14-34mu_2.csv")
 df8$simulation_setting <- "DGP 2"
-
-df9 <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/weighted-trees/out/2025-06-18_14-41mu_3.csv")
 df9$simulation_setting <- "DGP 3"
 
 data <- rbind(df7, df8, df9)
 
-
-new_df7$simulation_setting <- "DGP 1"
-new_df8$simulation_setting <- "DGP 2"
-new_df9$simulation_setting <- "DGP 3"
-data <- rbind(new_df7, new_df8, new_df9)
-
-
-
-
-
 # Change order of methods
-data$method <- factor(data$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "BART", "Weighted Sum-of-Trees", "Weighted Sum-of-Forests"))
+data$method <- factor(data$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "Weighted Sum-of-Trees", "Weighted Sum-of-Forests"))
 
+## Uncomment if you are using BART
+# new_df7$simulation_setting <- "DGP 1"
+# new_df8$simulation_setting <- "DGP 2"
+# new_df9$simulation_setting <- "DGP 3"
+# data <- rbind(new_df7, new_df8, new_df9)
+# data$method <- factor(data$method, levels=c("Linear Mixed Model", "Decision Tree", "Random Forest", "BART", "Weighted Sum-of-Trees", "Weighted Sum-of-Forests"))
 
 
 data$n <- as.factor(data$n)
@@ -177,39 +159,20 @@ ggplot(data, aes(x=n, y=MSE)) +
         strip.text.x = element_text(size = 12))
 
 
-ggsave("../figures/BART_comparison.png", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
+ggsave("../figures/simulation3.png", width=5.5, scale=2, height=2.5, units="in", dpi="retina")
 
 ```
 
 
 
-
-
-
-
-
-
-
-
-
+####################################################################################################
 
 ```{r}
+time_summary <- data %>%
+    group_by(method, n) %>%
+    summarize(mean_time = round(mean(time), 3)) %>%
+    pivot_wider(names_from = n, values_from = mean_time)
 
-# data <- read_csv("/Users/kmm12/Documents/documents-main/research/rice_research/projects/weighted-sum-of-trees/weighted-trees/out/2025-06-09_12-08wider_mean_squared_klarge.csv")
-
-data <- data %>%
-    mutate(method = as.factor(method),
-         # random_sigma = as.factor(random_sigma),
-         simulation_setting = "n = K") %>%
-    select(method, random_sigma, MSE, simulation_setting) %>%
-    group_by(method, random_sigma, simulation_setting) %>%
-    summarize(MSE = mean(MSE))
-
-
-ggplot(data, aes(x=random_sigma, y=MSE, color=method)) +
-    geom_line() +
-    geom_point()
-
+print(time_summary)
 
 ```
-

@@ -16,11 +16,9 @@ from sklearn.tree import DecisionTreeRegressor as DTR
 from sklearn.linear_model import LogisticRegression as LR
 from sklearn.naive_bayes import GaussianNB as GNB
 
-
+# statsmodels imports
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-
-
 
 
 
@@ -31,7 +29,6 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
 
     # Generate main covariates
     M = np.random.uniform(-1, 1, size=(k, p))  # group means
-    # M = np.zeros((k, p))
 
     U = invwishart.rvs(df=k+1, scale=np.identity(k))  # row covariance (group covariance)
     # U = np.identity(k)
@@ -44,7 +41,6 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
     X = X.reshape((n * k, p))
 
     # Generate group labels
-    # K = np.repeat(np.arange(k), n)
     K = np.tile(np.arange(k), n)
 
     # Create dataframe
@@ -62,8 +58,6 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
         + df["X4"]
         + 0.5 * df["X5"]
     )
-
-    # out = df["X1"] + df["X2"] + df["X3"] + df["X4"] + df["X5"]
 
     df["intercept"] = 1
 
@@ -91,10 +85,6 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
     df["Y"] = out + noise + df["random_effect"]
 
     df["fake"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
-    # df["fake2"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
-    # df["fake3"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
-    # df["fake4"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
-    # df["fake5"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
 
     # Standardize Y
     df["Y"] = (df["Y"] - df["Y"].mean()) / df["Y"].std()
@@ -133,7 +123,6 @@ def main():
             X_test = data[data["group"] >= last_group]
 
             input_vars = ["X1", "X2", "X3", "X4", "X5", "fake"]
-            # input_vars = ["X1", "X2", "X3", "X4", "X5", "fake", "fake2", "fake3", "fake4", "fake5"]
 
             ## Regular Tree
             start_time = time()
@@ -173,7 +162,6 @@ def main():
             df = X_train.drop(columns=["noise", "random_effect", "intercept", "group"])
 
             form = "X1 + X2 + X3 + X4 + X5 + fake"
-            # form = form + " + fake2 + fake3 + fake4 + fake5"
             md = smf.mixedlm("Y ~ " + form, df, groups=X_train["group"], re_formula=form)
             mdf = md.fit()
             pred = mdf.predict(X_test)
@@ -193,7 +181,7 @@ def main():
 
             # Build group classifier
             start_time = time()
-            group_clf = LR() # GNB() # LR()  # GNB()  # DTC or RFC or LR or something else?
+            group_clf = LR() # GNB() 
             group_clf.fit(
                 X_train[input_vars], X_train["group"]
             )
@@ -201,7 +189,6 @@ def main():
                 X_test[input_vars]
             )
 
-            group_pred = group_pred # + 0.5 #
 
             # Normalize group predictions
             row_sums = group_pred.sum(axis=1)
