@@ -1,6 +1,10 @@
 # weighted-trees
 This code repository accompanies the manuscript titled "Weighted Sum-of-Trees Model for Clustered Data" by  (McCoy et al., 2025). The manuscript is currently in peer review. This README will be updated as the article gets closer to publication.
 
+# Method Overview
+
+![](./figures/methods_figure.png)
+
 # Repository Structure
 
 - `./simulations/`
