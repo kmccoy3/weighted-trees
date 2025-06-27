@@ -5,6 +5,14 @@ data/*.xlsx
 data/*.tsv
 data/*.cct
 data/*.txt
+out/*.csv
+out/*.png
+out/*.txt
+figures/*.eps
+.vscode/
+syn_data/
+.Rhistory
+*.RData
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
