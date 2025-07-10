@@ -15,6 +15,7 @@ The two main folders in this repository correspond to figures generated for **Se
   - `print_plots.Rmd`: Prints nice plots in R from exported data.
   - `BART_sims.R`: This code tests BART on the synthetic data generated in `new_sims.py`.
 - `./3.2_Real-Data-Analysis/`
+  - `./data/`: This folder is where the user must download the external sarcoma data to run files in `./sarcoma_analysis/`.
   - `data_cleaning.ipynb`: Cleans raw sarcoma files present in `./data/`.
   - `PCA.Rmd`: Prints PCA plot.
   - `sarcoma_analysis.ipynb`: Analyzes various methods on the sarcoma dataset.
@@ -22,6 +23,6 @@ The two main folders in this repository correspond to figures generated for **Se
 
 Other folders include:
 
-- `./data/`: This folder is where the user must download the external sarcoma data to run files in `./sarcoma_analysis/`.
+
 - `./figures/`: This folder contains the figure outputs of various files.
 - `./out/`: This folder will contain the results of code run in `./simulations/`.

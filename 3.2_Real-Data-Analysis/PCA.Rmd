@@ -17,7 +17,7 @@ library(ggbiplot)
 
 ```{r}
 # Read in combined data, must run `data_cleaning.ipynb` first
-data <- read.csv("../data/combined_sarcoma_data.csv")
+data <- read.csv("./data/combined_sarcoma_data.csv")
 ```
 
 
