@@ -1,13 +1,5 @@
 # Personal additions
 .DS_Store
-data/*.csv
-data/*.xlsx
-data/*.tsv
-data/*.cct
-data/*.txt
-out/*.csv
-out/*.png
-out/*.txt
 figures/*.eps
 .vscode/
 syn_data/
