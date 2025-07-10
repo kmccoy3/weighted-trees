@@ -55,7 +55,6 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1, mu=1):
     M = np.random.uniform(0, 2, size=(k, p))  # group means
     U = np.identity(k)
     V = np.identity(p)
-
     X = matrix_normal.rvs(mean=M, rowcov=U, colcov=V, size=n)
 
     # Reshape X to be a 2D array
@@ -70,11 +69,10 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1, mu=1):
     # Generate random effects and common noise terms
     noise = np.random.normal(0, noise_sigma, n * k)
 
-
-    
+    # Add group labels to the dataframe
     df["group"] = K
 
-
+    # Generate Y according to the specified Data Generating Process (DGP)
     if mu == 1:
         out = mu_1(X, K)
     elif mu == 2:
@@ -83,11 +81,11 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1, mu=1):
         out = mu_3(X, K)
 
 
-
+    # Add the noise to the output
     df["noise"] = noise
-
     df["Y"] = out + noise
 
+    # Generate 5 fake variables
     df["fake"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
     df["fake2"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
     df["fake3"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
@@ -108,7 +106,7 @@ def main():
     # Initialize list to hold outputs
     results_list = []
 
-    # Iterate over random sigmas
+    # Iterate over n values
     for n in [20, 50, 100, 500]:
 
         # Iterate over seeds
@@ -124,7 +122,8 @@ def main():
                 mu = mu,
             )
 
-            data.to_csv("./syn_data/data_n-" + str(n) + "-Seed-" + str(seed) + "-mu-" + str(mu) + ".csv", index=False)
+            ## Uncomment line if you would like to save the generated data
+            # data.to_csv("./syn_data/data_n-" + str(n) + "-Seed-" + str(seed) + "-mu-" + str(mu) + ".csv", index=False)
 
             # Train-test split
             train_ratio = 0.8
@@ -134,7 +133,9 @@ def main():
 
             input_vars = ["X1", "X2", "X3", "X4", "X5", "fake", "fake2", "fake3", "fake4", "fake5"]
 
-            ## Regular Tree
+            ########################################################################################
+
+            ## Regular decision tree
             start_time = time()
             tree = DTR()
             tree.fit(X_train[input_vars], X_train["Y"])
@@ -150,10 +151,11 @@ def main():
                 }
             )
 
+            ########################################################################################
+
             ## Regular random forest
             start_time = time()
             tree = RFR(n_estimators=last_group)
-            # tree = RFR()
             tree.fit(X_train[input_vars], X_train["Y"])
             pred = tree.predict(X_test[input_vars])
             forest_mse = mse(X_test["Y"], pred)
@@ -167,16 +169,11 @@ def main():
                 }
             )
 
-
-
-
-
-
+            ########################################################################################
 
             ## Regular Linear Mixed Model
             start_time = time()
             df = X_train.drop(columns=["noise", "group"])
-
             form = "X1 + X2 + X3 + X4 + X5 + fake" # X6 + X7 + X8 + X9 + X10"
             form = form + " + fake2 + fake3 + fake4 + fake5"
             md = smf.mixedlm("Y ~ " + form, df, groups=X_train["group"], re_formula=form)
@@ -193,8 +190,9 @@ def main():
                 }
             )
 
+            ########################################################################################
 
-            ###############################################################################
+            # Weighted Sum-of-Trees
 
             # Build group classifier
             start_time = time()
@@ -215,7 +213,7 @@ def main():
                 average = np.mean(group_pred[rows,], axis=1)
                 group_pred[rows] = average
 
-            ## Weighted Sum-of-Trees
+            # Build Sum-of-Trees
             list_of_trees = []
             for i in range(last_group):
                 tree = DTR()
@@ -247,13 +245,10 @@ def main():
                 }
             )
 
-            ###############################################################################
-
-            # Build group classifier
-            start_time = time()
-
+            ########################################################################################
 
             ## Weighted Sum-of-Forests
+            start_time = time()
             list_of_trees = []
             for i in range(last_group):
                 tree = RFR(n_estimators=last_group)
@@ -286,9 +281,9 @@ def main():
                 }
             )
 
+            ########################################################################################
 
-
-        print("Finished TEST n=", n)
+        print("Finished TEST n=", n, "\n")
 
     # Save results in csv and plot
     df = pd.DataFrame(results_list)
@@ -296,7 +291,7 @@ def main():
     filename = "./out/" + curr_datetime + test_name 
     df.to_csv(filename + ".csv", index=False)
 
-
+    # Plot results
     sns.boxplot(
         data=df,
         x="n",
@@ -340,9 +335,9 @@ if __name__ == "__main__":
     mu = 1
     k = 20
     noise_sigma = 1
-    num_seeds = 20
+    num_seeds = 5
 
-    print("...starting...")
+    print("...starting...\n")
 
     main()
 

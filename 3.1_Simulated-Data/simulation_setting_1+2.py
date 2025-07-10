@@ -29,13 +29,10 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
 
     # Generate main covariates
     M = np.random.uniform(-1, 1, size=(k, p))  # group means
-
     U = invwishart.rvs(df=k+1, scale=np.identity(k))  # row covariance (group covariance)
     # U = np.identity(k)
-
-    V = np.identity(p)
-
-    X = matrix_normal.rvs(mean=M, rowcov=U, colcov=V, size=n)
+    V = np.identity(p) # column covariance
+    X = matrix_normal.rvs(mean=M, rowcov=U, colcov=V, size=n) # Generate X data
 
     # Reshape X to be a 2D array
     X = X.reshape((n * k, p))
@@ -52,6 +49,7 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
     if p != 5:
         raise ValueError("Friedman function requires 5 covariates!")
 
+    # Friedman function
     out = (
         np.sin(np.pi * df["X1"] * df["X2"])
         + 2 * (df["X3"] - 0.5) ** 2
@@ -59,31 +57,30 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
         + 0.5 * df["X5"]
     )
 
+    # Add intercept, group labels, and random effects to the dataframe
     df["intercept"] = 1
-
     df["group"] = K
-
     df["random_effect"] = 0.0
 
+    # Generate random effects for each group
     M = np.zeros((k, p+1))
     V = random_sigma * np.identity(p+1)
-
     random_effs = matrix_normal.rvs(mean=M, rowcov=U, colcov=V, size=1)
 
-
+    # Add random effects into df
     for i in range(k):
         X = df[df["group"] == i].drop(columns=["group", "random_effect"])
-
-        # print(X.columns)
         group_alpha = random_effs[i, :]
         random_effect = np.matmul(X, group_alpha)
-
         df.loc[df["group"] == i, "random_effect"] = random_effect
 
+    # Add noise to the output
     df["noise"] = noise
 
+    # Calculate the final output Y
     df["Y"] = out + noise + df["random_effect"]
 
+    # Add fake covariate
     df["fake"] = norm.rvs(loc=0, scale=1, size=(n * k, 1))
 
     # Standardize Y
@@ -91,8 +88,6 @@ def generate_data(seed=0, p=5, n=25, k=25, random_sigma=1, noise_sigma=1):
 
     # Output final dataframe
     return df
-
-
 
 
 def main():
@@ -124,7 +119,9 @@ def main():
 
             input_vars = ["X1", "X2", "X3", "X4", "X5", "fake"]
 
-            ## Regular Tree
+            ########################################################################################
+
+            ## Regular decision tree
             start_time = time()
             tree = DTR()
             tree.fit(X_train[input_vars], X_train["Y"])
@@ -139,6 +136,8 @@ def main():
                     "time": time() - start_time,
                 }
             )
+
+            ########################################################################################
 
             ## Regular random forest
             start_time = time()
@@ -156,6 +155,7 @@ def main():
                 }
             )
 
+            ########################################################################################
 
             ## Regular Linear Mixed Model
             start_time = time()
@@ -177,7 +177,9 @@ def main():
             )
 
 
-            ###############################################################################
+            ########################################################################################
+
+            ## Weighted Sum-of-Trees
 
             # Build group classifier
             start_time = time()
@@ -199,7 +201,7 @@ def main():
                 average = np.mean(group_pred[rows,], axis=1)
                 group_pred[rows] = average
 
-            ## Weighted Sum-of-Trees
+            ## Build Sum-of-Trees
             list_of_trees = []
             for i in range(last_group):
                 tree = DTR()
@@ -233,11 +235,8 @@ def main():
 
             ###############################################################################
 
-            # Build group classifier
-            start_time = time()
-
-
             ## Weighted Sum-of-Forests
+            start_time = time()
             list_of_trees = []
             for i in range(last_group):
                 tree = RFR(n_estimators=last_group)
@@ -270,17 +269,18 @@ def main():
                 }
             )
 
-
+            ########################################################################################
 
         print("Finished Random Sigma: ", random_sigma)
 
+        
     # Save results in csv and plot
     df = pd.DataFrame(results_list)
     curr_datetime = strftime(f"%Y-%m-%d_%H-%M", localtime())
     filename = "./out/" + curr_datetime + test_name
     df.to_csv(filename + ".csv", index=False)
 
-
+    # Plot results
     sns.boxplot(
         data=df,
         x="random_sigma",
@@ -318,16 +318,16 @@ def main():
 
 if __name__ == "__main__":
 
-    test_name = "lownhighk_2"
+    test_name = "neqk"
 
     # Simulated Data parameters
     p = 5
-    n = 10
-    k = 40
+    n = 20
+    k = 20
     noise_sigma = 1
     num_seeds = 20
 
-    print("...starting...")
+    print("...starting...\n")
 
     main()
 
