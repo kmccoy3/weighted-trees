@@ -9,7 +9,7 @@ This code repository accompanies the manuscript titled "Weighted Sum-of-Trees Mo
 
 The two main folders in this repository correspond to figures generated for **Section 3.1 Simulated Data**, and **Section 3.2 Real Data Application**, respectively.
 
-- `./simulations/`
+- `./3.1_Simulated-Data/`
   - `run_simulation.py`: Run simulations from *Simulation Setting 1* and *Simulation Setting 2*.
   - `new_sims.py`: Runs simulations *Simulation Setting 3*.
   - `print_plots.Rmd`: Prints nice plots in R from exported data.
