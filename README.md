@@ -7,16 +7,16 @@ This code repository accompanies the manuscript titled "Weighted Sum-of-Trees Mo
 
 # Repository Structure
 
-The two main folders in this repository correspond to figures generated for **Section 3.1 Simulated Data**, and **Section 3.2 Real Data Application**, respectively.
+The two main folders in this repository correspond to figures generated for **Section 3.1 Simulated Data** and **Section 3.2 Real Data Application**, respectively.
 
 - `./3.1_Simulated-Data/`
-  - `./out/`: This folder will contain the results of code run in `./simulations/`.
+  - `./out/`: This folder will contain the results of code run in `./3.1_Simulated-Data/`.
   - `run_simulation.py`: Run simulations from *Simulation Setting 1* and *Simulation Setting 2*.
   - `new_sims.py`: Runs simulations *Simulation Setting 3*.
   - `print_plots.Rmd`: Prints nice plots in R from exported data.
   - `BART_sims.R`: This code tests BART on the synthetic data generated in `new_sims.py`.
 - `./3.2_Real-Data-Analysis/`
-  - `./data/`: This folder is where the user must download the external sarcoma data to run files in `./sarcoma_analysis/`.
+  - `./data/`: This folder is where the user must download the external sarcoma data to run files in `./3.2_Real-Data-Analysis/`.
   - `data_cleaning.ipynb`: Cleans raw sarcoma files present in `./data/`.
   - `PCA.Rmd`: Prints PCA plot.
   - `sarcoma_analysis.ipynb`: Analyzes various methods on the sarcoma dataset.
@@ -24,3 +24,20 @@ The two main folders in this repository correspond to figures generated for **Se
 
 Other folders include:
 - `./figures/`: This folder contains the figure outputs of various files.
+
+
+# Citation
+
+To cite this repository, simply cite our manuscript:
+
+```{TeX}
+@article{mccoy2025weighted,
+  title={Weighted Sum-of-Trees Model for Clustered Data},
+  author={McCoy, Kevin and Wooten, Zachary and Tomczak, Katarzyna and Peterson, Christine B.},
+  journal={TBD},
+  volume={TBD},
+  pages={TBD},
+  year={2025},
+  publisher={TBD}
+}
+```
