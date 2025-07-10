@@ -11,8 +11,8 @@ The two main folders in this repository correspond to figures generated for **Se
 
 - `./3.1_Simulated-Data/`
   - `./out/`: This folder will contain the results of code run in `./3.1_Simulated-Data/`.
-  - `run_simulation.py`: Run simulations from *Simulation Setting 1* and *Simulation Setting 2*.
-  - `new_sims.py`: Runs simulations *Simulation Setting 3*.
+  - `simulatiuon_setting_1+2.py`: Run simulations from *Simulation Setting 1* and *Simulation Setting 2*.
+  - `simulatiuon_setting_3.py`: Runs simulations *Simulation Setting 3*.
   - `print_plots.Rmd`: Prints nice plots in R from exported data.
   - `BART_sims.R`: This code tests BART on the synthetic data generated in `new_sims.py`.
 - `./3.2_Real-Data-Analysis/`
