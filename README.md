@@ -10,6 +10,7 @@ This code repository accompanies the manuscript titled "Weighted Sum-of-Trees Mo
 The two main folders in this repository correspond to figures generated for **Section 3.1 Simulated Data**, and **Section 3.2 Real Data Application**, respectively.
 
 - `./3.1_Simulated-Data/`
+  - `./out/`: This folder will contain the results of code run in `./simulations/`.
   - `run_simulation.py`: Run simulations from *Simulation Setting 1* and *Simulation Setting 2*.
   - `new_sims.py`: Runs simulations *Simulation Setting 3*.
   - `print_plots.Rmd`: Prints nice plots in R from exported data.
@@ -22,7 +23,4 @@ The two main folders in this repository correspond to figures generated for **Se
   - `vivi_plots.Rmd`: Prints all VIVI plots.
 
 Other folders include:
-
-
 - `./figures/`: This folder contains the figure outputs of various files.
-- `./out/`: This folder will contain the results of code run in `./simulations/`.
