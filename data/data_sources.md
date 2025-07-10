@@ -1,5 +1,5 @@
 
-In order to run the code within `/sarcoma_analysis`, you must download the relevant data from the sarcoma cohort of The Cancer Genome Atlas (TCGA). Below is a list of the files and where they can be downloaded.
+In order to run the code within `/sarcoma_analysis/`, you must download the relevant data from the sarcoma cohort of The Cancer Genome Atlas (TCGA). Below is a list of the files and where they can be downloaded.
 
 Files:
 - Demographic Data
